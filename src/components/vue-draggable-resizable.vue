@@ -229,6 +229,10 @@ export default {
     onResize: {
       type: Function,
       default: () => true
+    },
+    excludeClassName: {
+      type: String,
+      default: ''
     }
   },
 
@@ -421,11 +425,22 @@ export default {
         maxBottom: Math.floor((this.parentHeight - this.height - this.bottom) / this.grid[1]) * this.grid[1] + this.bottom
       }
     },
+    eparent (path) {
+      var _that = this
+      if (!path || !this.excludeClassName) return false
+      for (var i in path) {
+        if (path[i].className && path[i].className.includes(_that.excludeClassName)) {
+          return true
+        }
+      }
+      return false
+    },
     deselect (e) {
       const target = e.target || e.srcElement
       const regex = new RegExp(this.className + '-([trmbl]{2})', '')
+      const path = e.path || (e.composedPath && e.composedPath())
 
-      if (!this.$el.contains(target) && !regex.test(target.className)) {
+      if (!this.$el.contains(target) && !regex.test(target.className) && (this.excludeClassName && !this.eparent(path))) {
         if (this.enabled && !this.preventDeactivation) {
           this.enabled = false
 
